@@ -35,7 +35,7 @@ class ReceiversAccountsTest(TestCase):
 
 
     def test_send_invitation_email(self):
-        self.skipTest()
+        self.skipTest(reason="TODO")
         self.assertTrue(False)
 
 
@@ -49,10 +49,10 @@ class ReceiversAccountsTest(TestCase):
 
 
     def test_send_verification_email(self):
-        self.skipTest()
+        self.skipTest(reason="TODO")
         self.assertTrue(False)
 
 
     def test_send_password_reset_email(self):
-        self.skipTest()
+        self.skipTest(reason="TODO")
         self.assertTrue(False)
