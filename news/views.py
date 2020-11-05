@@ -395,7 +395,3 @@ def humans_txt(request):
     return HttpResponse("""
 🐍
     """, content_type='text/plain', charset='utf-8')
-
-
-def bookmarklet(request):
-    return render(request, 'news/bookmarklet.html')
