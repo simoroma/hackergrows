@@ -229,6 +229,7 @@ Temporary Items
 # Pyre type checker
 
 ### VisualStudioCode ###
+.vscode
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
