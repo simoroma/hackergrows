@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'TODO' # TODO
+SECRET_KEY = 'TODO'  # TODO
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -30,7 +30,6 @@ DEBUG = True
 
 USE_X_FORWARDED_HOST = True
 ALLOWED_HOSTS = [
-    'news.python.sc',
     'localhost',
 ]
 
@@ -53,7 +52,7 @@ INSTALLED_APPS = [
     'news',
     'emaildigest',
 
-    
+
 ]
 
 MIDDLEWARE = [
@@ -67,7 +66,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'django.middleware.gzip.GZipMiddleware',
-    #'htmlmin.middleware.HtmlMinifyMiddleware', # TODO: When activated, Django Debug Toolbar has JS issues
+    # 'htmlmin.middleware.HtmlMinifyMiddleware', # TODO: When activated, Django Debug Toolbar has JS issues
     'htmlmin.middleware.MarkRequestMiddleware',
 ]
 
@@ -160,18 +159,16 @@ PAGING_SIZE = 30
 HTML_MINIFY = True
 
 
-
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
-
 
 
 ACCEPT_UNINVITED_REGISTRATIONS = True
 
 
-SITE_NAME = 'Pythonic News'
-SITE_URL = 'https://news.python.sc'
-SITE_DOMAIN = 'news.python.sc'
+SITE_NAME = 'Hackergrows'
+SITE_URL = 'https://hackergrows.com'
+SITE_DOMAIN = 'hackergrows.com'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
