@@ -133,14 +133,15 @@ def add_domain_to_link_stories(sender, instance, **kwargs):
             instance.product_url_domain = o.hostname.lower()
 
 
-# TODO fix, this is called twice. Adding uid does not work
 @receiver(pre_save)
 def add_title(sender, instance, **kwargs):
     if isinstance(instance, Story):
-        instance.title = _get_title(url=instance.original_url,
-                                    back_up_title=instance.original_url)
-        instance.product_title = _get_title(url=instance.product_url,
-                                            back_up_title=instance.product_url)
+        if not instance.title:
+            instance.title = _get_title(url=instance.original_url,
+                                        back_up_title=instance.original_url)
+        if not instance.product_title:
+            instance.product_title = _get_title(url=instance.product_url,
+                                                back_up_title=instance.product_url)
 
 
 def _get_title(url, back_up_title):
