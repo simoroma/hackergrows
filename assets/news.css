@@ -1,20 +1,7 @@
-/*
-
-https://www.schemecolor.com/python-logo-colors.php
-Cyan-Blue Azure     #4B8BBE
-Lapis Lazuli        #306998
-Shandy              #FFE873
-Sunglow             #FFD43B
-Granite Gray        #646464
-
-
-*/
-/* https://encycolorpedia.com/646464 */
-
 /* General formatting */
 
-body        { font-family:Verdana, Geneva, sans-serif; font-size:10pt; color:#646464; }
-td          { font-family:Verdana, Geneva, sans-serif; font-size:10pt; color:#646464; }
+body        { font-family:Verdana, Geneva, sans-serif; font-size:10pt; color:#444444; }
+td          { font-family:Verdana, Geneva, sans-serif; font-size:10pt; color:#444444; }
 .smaller    { font-size:7pt; }
 
 input       { font-family:monospace; font-size:10pt; }
@@ -38,12 +25,12 @@ ul.horizontal-list li {
 button { padding: 0.25em; }
 
 a { color: inherit; }
-.green { color:green; }
+.green { color:#00ad00; }
 
-nav#top-bar { background-color:#306998; }
-nav#footer-bar { background-color:#FFD43B; }
-main { background-color: #EDF3F9; }
-nav#top-bar * { color:#FFE873; }
+nav#top-bar { background-color:#ffffff; }
+nav#footer-bar { background-color:#ffffff; }
+main { background-color: #ffffff; }
+nav#top-bar * { color:#4d4d4d; }
 
 .site-content { margin: 3%; }
 .site-content-dense  { margin: 1%; }
@@ -51,8 +38,8 @@ td {padding-right:8px; vertical-align: text-top;}
 #top-bar td {vertical-align: middle;}
 tr.spacer {height:1em;}
 
-.highlight {background-color:#FFE873;}
-.self-item {color: #4B8BBE;}
+.highlight {background-color:#ebebeb;}
+.self-item {color: #696969;}
 
 .title > a {
     text-decoration: none;
@@ -67,7 +54,7 @@ tr.spacer {height:1em;}
 /* Site layout */
 
 nav#top-bar *.active {
-    color: #FFD43B;
+    color: #252525;
     font-weight: bold;
 }
 
@@ -77,7 +64,7 @@ nav#top-bar *.active {
 }
 
 nav#pre-footer-bar > hr {
-    border-top: 2px solid #306998;
+    border-top: 2px solid #ffffff;
     width: 95%;
 }
 
@@ -147,7 +134,7 @@ div.arrow-up {
     height: 0;
     border-style: solid;
     border-width: 0 0.3em 0.7em 0.3em;
-    border-color: transparent transparent #646464 transparent;
+    border-color: transparent transparent #444444 transparent;
 }
 
 div.arrow-down {
@@ -155,7 +142,7 @@ div.arrow-down {
     height: 0;
     border-style: solid;
     border-width: 0.7em 0.3em 0 0.3em;
-    border-color: #646464 transparent transparent transparent;
+    border-color: #444444 transparent transparent transparent;
 }
 
 
@@ -201,13 +188,13 @@ and (max-width : 750px) {
         transform: scale(1.8);
     }
 
-    body        { font-family:Verdana, Geneva, sans-serif; font-size:12pt; color:#646464; }
-    td          { font-family:Verdana, Geneva, sans-serif; font-size:12pt; color:#646464; }
+    body        { font-family:Verdana, Geneva, sans-serif; font-size:12pt; color:#444444; }
+    td          { font-family:Verdana, Geneva, sans-serif; font-size:12pt; color:#444444; }
     .smaller    { font-size:10pt; }
 
     button {
         background-color: #e3e3e3;
-        border: #646464;
+        border: #444444;
         color: #535353;
         text-align: center;
         text-decoration: none;
@@ -225,7 +212,7 @@ and (max-width : 750px) {
         height: 0;
         border-style: solid;
         border-width: 0 0.2em 0.6em 0.2em;
-        border-color: transparent transparent #646464 transparent;
+        border-color: transparent transparent #444444 transparent;
     }
 
     div.arrow-down {
@@ -233,7 +220,7 @@ and (max-width : 750px) {
         height: 0;
         border-style: solid;
         border-width: 0.6em 0.2em 0 0.2em;
-        border-color: #646464 transparent transparent transparent;
+        border-color: #444444 transparent transparent transparent;
     }
 
 

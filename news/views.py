@@ -418,5 +418,5 @@ Disallow:
 
 def humans_txt(request):
     return HttpResponse("""
-🐍
+🌱
     """, content_type='text/plain', charset='utf-8')
