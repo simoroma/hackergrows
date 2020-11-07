@@ -51,10 +51,6 @@
                             <a href="{{ url }}" {% if url == request.path %}class="active"{% endif %}>threads</a>
                             | {% url 'comments' as url %}
                             <a href="{{ url }}" {% if url == request.path %}class="active"{% endif %}>comments</a>
-                            | {% url 'ask' as url %}
-                            <a href="{{ url }}" {% if url == request.path %}class="active"{% endif %}>ask</a>
-                            | {% url 'show' as url %}
-                            <a href="{{ url }}" {% if url == request.path %}class="active"{% endif %}>show</a>
                             {% url 'submit' as url %}
                             | <a href="{{ url }}" {% if url == request.path %}class="active"{% endif %}>submit</a>
                             </span></td>

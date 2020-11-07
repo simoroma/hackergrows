@@ -9,7 +9,6 @@ from django.urls import reverse
 from urllib.parse import urlparse
 
 
-
 class Item(MPTTModel):
     class Meta:
         indexes = [
@@ -27,16 +26,15 @@ class Item(MPTTModel):
     downvotes = models.PositiveIntegerField(default=0, editable=False)
     points = models.IntegerField(default=0, editable=False)
     num_comments = models.PositiveIntegerField(default=0, editable=False)
-    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children', editable=False)
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True,
+                            blank=True, related_name='children', editable=False)
     user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
 
     is_ask = models.BooleanField(default=False)
     is_show = models.BooleanField(default=False)
 
-
     def get_absolute_url(self):
         return reverse("item", kwargs={"pk": self.pk})
-
 
     def can_be_upvoted_by(self, user):
         if not user.is_authenticated:
@@ -46,7 +44,7 @@ class Item(MPTTModel):
         if Vote.objects.filter(user=user, item=self).count():
             return False
         return True
-    
+
     def can_be_downvoted_by(self, user):
         if not user.is_authenticated:
             return False
@@ -60,31 +58,37 @@ class Item(MPTTModel):
 
     def can_be_edited_by(self, user):
         return self.user == user and self.num_comments == 0
-    
+
     def can_be_deleted_by(self, user):
         return self.can_be_edited_by(user)
-
 
 
 class Story(Item):
     class Meta:
         indexes = [
-            models.Index(fields=['domain', 'duplicate_of']),
+            models.Index(fields=['original_url_domain',
+                                 'product_url_domain',
+                                 'duplicate_of']),
         ]
     is_story = True
 
     # class Meta:
     #     ordering = ['-pk']
     title = models.CharField(max_length=255, blank=True)
-    url = models.URLField(null=True, blank=True)
+    original_url = models.URLField(blank=True)
+    product_url = models.URLField(blank=True)
+    product_title = models.CharField(max_length=255, blank=True)
     text = models.TextField(null=True, blank=True)
-    duplicate_of = models.ForeignKey('Story', on_delete=models.CASCADE, null=True)
-    domain = models.CharField(max_length=255, null=True, blank=True, db_index=True)
-    
+    duplicate_of = models.ForeignKey(
+        'Story', on_delete=models.CASCADE, null=True, blank=True)
+    original_url_domain = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True)
+    product_url_domain = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True)
 
     def __str__(self):
-        return self.title
-    
+        return self.title + ' - ' + self.product_title
+
     # @property
     # def domain(self):
     #     o = urlparse(self.url)
@@ -105,14 +109,15 @@ class Comment(Item):
     is_comment = True
 
     text = models.TextField()
-    to_story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="comments")
+    to_story = models.ForeignKey(
+        Story, on_delete=models.CASCADE, related_name="comments")
 
     def __str__(self):
         return self.text[:255]
 
     def comments(self):
         return {
-            #'all': lambda: [i.comment for i in self.get_descendants().select_related('comment')]
+            # 'all': lambda: [i.comment for i in self.get_descendants().select_related('comment')]
             'all': lambda: [i.comment for i in self.get_descendants()]
         }
 
@@ -125,5 +130,3 @@ class Vote(models.Model):
     # vote = None # -1 | 0 | 1 --> BooleanField(default=None, null=True)??
     vote = models.SmallIntegerField(default=1)
     user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
-
-

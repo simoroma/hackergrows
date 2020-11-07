@@ -1,5 +1,6 @@
 """hnclone URL Configuration
 """
+from ratelimit.exceptions import Ratelimited
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -20,8 +21,7 @@ if settings.DEBUG:
     ] + urlpatterns
 
 
-from ratelimit.exceptions import Ratelimited
 def handler403(request, exception=None):
     if isinstance(exception, Ratelimited):
-        return HttpResponse("<img src='https://http.cat/429.jpg'><br>Sorry, we're not able to serve your requests this quickly.", status=429)
+        return HttpResponse("Sorry, we're not able to serve your requests this quickly.", status=429)
     return HttpResponseForbidden('Forbidden')

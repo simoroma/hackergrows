@@ -1,3 +1,13 @@
+from django.db.models.functions import Power, Now, Cast, Extract  # , Min
+from django.db import connection
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from django.core.cache import cache
+import datetime
+from django.utils import timezone
+from django.db import models
+from django.db.models import OuterRef, Subquery
+from django.db.models import Value, F, Func, ExpressionWrapper, fields, Q, Min
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
@@ -20,27 +30,13 @@ from ratelimit.decorators import ratelimit
 # suggest changes
 # save
 
-
-DEFAULT_GET_RATE   = "2/s"
+DEFAULT_GET_RATE = "2/s"
 DEFAULT_VOTES_RATE = "10/m"
-DEFAULT_POST_RATE  = "5/m"
-
-TIMEOUT_MEDIUM = 0# 1*60 # one minute
-TIMEOUT_SHORT  = 0# 1*2 # two seconds
+DEFAULT_POST_RATE = "5/m"
 
 
-from django.db.models.functions import Power, Now, Cast, Extract #, Min
-from django.db.models import Value, F, Func, ExpressionWrapper, fields, Q, Min
-from django.db.models import OuterRef, Subquery
-from django.db import models
-from django.utils import timezone
-import datetime
-
-from django.core.cache import cache
-from django.views.decorators.vary import vary_on_cookie
-from django.views.decorators.cache import cache_page
-
-from django.db import connection
+TIMEOUT_MEDIUM = 0  # 1*60 # one minute
+TIMEOUT_SHORT = 0  # 1*2 # two seconds
 
 
 def _one_page_back(request):
@@ -51,8 +47,9 @@ def _one_page_back(request):
         query_dict['p'] = page
     else:
         return None
-    _more_link=request.path_info + '?' + query_dict.urlencode()
+    _more_link = request.path_info + '?' + query_dict.urlencode()
     return HttpResponseRedirect(_more_link)
+
 
 def _front_page(paging_size=settings.PAGING_SIZE, page=0, add_filter={}, add_q=[], as_of=None, days_back=50):
     # TODO: weighting https://medium.com/hacking-and-gonzo/how-hacker-news-ranking-algorithm-works-1d9b0cf2c08d
@@ -63,42 +60,51 @@ def _front_page(paging_size=settings.PAGING_SIZE, page=0, add_filter={}, add_q=[
         now = as_of
     if connection.vendor == 'postgresql':
         now_value = Value(now, output_field=fields.DateTimeField())
-        submission_age_float = ExpressionWrapper(  ( now_value - F('created_at')), output_field=fields.DurationField())
-        submission_age_hours = ExpressionWrapper(Extract(F('tf'), 'epoch') / 60 / 60 + 2.1 , output_field=fields.FloatField())
-        real_p = ExpressionWrapper(F('points') - 1, output_field=fields.FloatField())
-        formula = ExpressionWrapper(   F('p') / ( Power(F('tfh'), F('g'))  +0.001)   , output_field=fields.FloatField())
+        submission_age_float = ExpressionWrapper(
+            (now_value - F('created_at')), output_field=fields.DurationField())
+        submission_age_hours = ExpressionWrapper(
+            Extract(F('tf'), 'epoch') / 60 / 60 + 2.1, output_field=fields.FloatField())
+        real_p = ExpressionWrapper(
+            F('points') - 1, output_field=fields.FloatField())
+        formula = ExpressionWrapper(
+            F('p') / (Power(F('tfh'), F('g')) + 0.001), output_field=fields.FloatField())
         return Story.objects.select_related('user')\
-                .filter(duplicate_of__isnull=True)\
-                .filter(points__gte=1) \
-                .filter(created_at__gte=now - datetime.timedelta(days=days_back)) \
-                .filter(created_at__lte=now) \
-                .filter(**add_filter) \
-                .annotate(tf=submission_age_float) \
-                .annotate(tfh=submission_age_hours) \
-                .annotate(p=real_p) \
-                .annotate(g=Value(1.8, output_field=fields.FloatField())) \
-                .annotate(formula=formula) \
-                .order_by('-formula')[(page*paging_size):(page+1)*(paging_size)]
+            .filter(duplicate_of__isnull=True)\
+            .filter(points__gte=1) \
+            .filter(created_at__gte=now - datetime.timedelta(days=days_back)) \
+            .filter(created_at__lte=now) \
+            .filter(**add_filter) \
+            .annotate(tf=submission_age_float) \
+            .annotate(tfh=submission_age_hours) \
+            .annotate(p=real_p) \
+            .annotate(g=Value(1.8, output_field=fields.FloatField())) \
+            .annotate(formula=formula) \
+            .order_by('-formula')[(page*paging_size):(page+1)*(paging_size)]
     elif connection.vendor == 'sqlite':
         now_value = Value(now, output_field=fields.DateTimeField())
-        submission_age_float = ExpressionWrapper(  ( now_value - F('created_at')), output_field=fields.FloatField())
-        submission_age_hours = ExpressionWrapper(F('tf') / 60 / 60 / 1000000 + 2.1 , output_field=fields.FloatField())
-        real_p = ExpressionWrapper(F('points') - 1, output_field=fields.FloatField())
-        formula = ExpressionWrapper(   F('p') / ( Power(F('tfh'), F('g'))  +0.001)   , output_field=fields.FloatField())
+        submission_age_float = ExpressionWrapper(
+            (now_value - F('created_at')), output_field=fields.FloatField())
+        submission_age_hours = ExpressionWrapper(
+            F('tf') / 60 / 60 / 1000000 + 2.1, output_field=fields.FloatField())
+        real_p = ExpressionWrapper(
+            F('points') - 1, output_field=fields.FloatField())
+        formula = ExpressionWrapper(
+            F('p') / (Power(F('tfh'), F('g')) + 0.001), output_field=fields.FloatField())
         return Story.objects.select_related('user')\
-                .filter(duplicate_of__isnull=True)\
-                .filter(points__gte=1) \
-                .filter(created_at__gte=now - datetime.timedelta(days=days_back)) \
-                .filter(created_at__lte=now) \
-                .filter(**add_filter) \
-                .annotate(tf=submission_age_float) \
-                .annotate(tfh=submission_age_hours) \
-                .annotate(p=real_p) \
-                .annotate(g=Value(1.8, output_field=fields.FloatField())) \
-                .annotate(formula=formula) \
-                .order_by('-formula')[(page*paging_size):(page+1)*(paging_size)]
-    else: 
-        raise NotImplementedError("No frontpage magic for database engine %s implemented"%(connection.vendor))
+            .filter(duplicate_of__isnull=True)\
+            .filter(points__gte=1) \
+            .filter(created_at__gte=now - datetime.timedelta(days=days_back)) \
+            .filter(created_at__lte=now) \
+            .filter(**add_filter) \
+            .annotate(tf=submission_age_float) \
+            .annotate(tfh=submission_age_hours) \
+            .annotate(p=real_p) \
+            .annotate(g=Value(1.8, output_field=fields.FloatField())) \
+            .annotate(formula=formula) \
+            .order_by('-formula')[(page*paging_size):(page+1)*(paging_size)]
+    else:
+        raise NotImplementedError(
+            "No frontpage magic for database engine %s implemented" % (connection.vendor))
 
 
 def _newest(paging_size=settings.PAGING_SIZE, page=0, add_filter={}, add_q=[]):
@@ -113,45 +119,50 @@ def _newest(paging_size=settings.PAGING_SIZE, page=0, add_filter={}, add_q=[]):
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, block=True)
 def index(request):
     page = int(request.GET.get('p', 0))
-    stories = cache.get_or_set("news-index-%s"%(page), lambda: list(_front_page(page=page)), timeout=TIMEOUT_MEDIUM) # one minute
+    stories = cache.get_or_set("news-index-%s" % (page), lambda: list(
+        _front_page(page=page)), timeout=TIMEOUT_MEDIUM)  # one minute
     if len(stories) < 1 and page != 0:
         back = _one_page_back(request)
         if back:
             return back
-    return render(request, 'news/index.html', {'stories': stories, 'hide_text':True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
+    return render(request, 'news/index.html', {'stories': stories, 'hide_text': True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
 
 
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, block=True)
 def show(request):
     page = int(request.GET.get('p', 0))
-    stories = cache.get_or_set("news-show-%s"%(page), lambda: list(_front_page(page=page, add_filter={'is_show': True})), timeout=TIMEOUT_MEDIUM) # one minute
+    stories = cache.get_or_set("news-show-%s" % (page), lambda: list(_front_page(
+        page=page, add_filter={'is_show': True})), timeout=TIMEOUT_MEDIUM)  # one minute
     if len(stories) < 1 and page != 0:
         back = _one_page_back(request)
         if back:
             return back
-    return render(request, 'news/index.html', {'stories': stories, 'hide_text':True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
+    return render(request, 'news/index.html', {'stories': stories, 'hide_text': True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
 
 
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, block=True)
 def ask(request):
     page = int(request.GET.get('p', 0))
-    stories = lambda: list(_front_page(page=page, add_filter={'is_ask': True}))
-    stories = cache.get_or_set("news-ask-%s"%(page), stories, timeout=TIMEOUT_MEDIUM) # one minute
+    def stories(): return list(_front_page(
+        page=page, add_filter={'is_ask': True}))
+    stories = cache.get_or_set(
+        "news-ask-%s" % (page), stories, timeout=TIMEOUT_MEDIUM)  # one minute
     if len(stories) < 1 and page != 0:
         back = _one_page_back(request)
         if back:
             return back
-    return render(request, 'news/index.html', {'stories': stories, 'hide_text':True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
+    return render(request, 'news/index.html', {'stories': stories, 'hide_text': True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
 
 
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, block=True)
-def newest(request): # Done
+def newest(request):  # Done
     page = int(request.GET.get('p', 0))
     add_filter = {}
     add_q = []
     if 'submitted_by' in request.GET.keys():
         try:
-            submitted_by = CustomUser.objects.get_by_natural_key(request.GET['submitted_by'])
+            submitted_by = CustomUser.objects.get_by_natural_key(
+                request.GET['submitted_by'])
             add_filter['user'] = submitted_by
         except CustomUser.DoesNotExist:
             raise Http404()
@@ -161,17 +172,22 @@ def newest(request): # Done
             assert request.user.username == request.GET['upvoted_by']
         except AssertionError:
             return HttpResponseForbidden()
-        add_filter['pk__in'] = Vote.objects.filter(vote=1, user=request.user).values('item')
+        add_filter['pk__in'] = Vote.objects.filter(
+            vote=1, user=request.user).values('item')
         add_q.append(~Q(user=request.user))
     if 'site' in request.GET.keys():
-        add_filter['domain'] = request.GET['site']
-    stories = lambda: list(_newest(page=page, add_filter=add_filter, add_q=add_q))
-    stories = cache.get_or_set("news-newest-%s"%(page), stories, timeout=TIMEOUT_SHORT) # two seconds
+        add_filter['original_url_domain'] = request.GET['site']
+    if 'product' in request.GET.keys():
+        add_filter['product_url_domain'] = request.GET['product']
+
+    def stories(): return list(_newest(page=page, add_filter=add_filter, add_q=add_q))
+    stories = cache.get_or_set(
+        "news-newest-%s" % (page), stories, timeout=TIMEOUT_SHORT)  # two seconds
     if len(stories) < 1 and page != 0:
         back = _one_page_back(request)
         if back:
             return back
-    return render(request, 'news/index.html', {'stories': stories, 'hide_text':True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
+    return render(request, 'news/index.html', {'stories': stories, 'hide_text': True, 'page': page, 'rank_start': page*settings.PAGING_SIZE})
 
 
 @login_required
@@ -181,11 +197,14 @@ def newest(request): # Done
 def threads(request):
     page = int(request.GET.get('p', 0))
     paging_size = settings.PAGING_SIZE
-    tree = Comment.objects.filter( tree_id=OuterRef('tree_id'), user=OuterRef('user')).values('tree_id', 'user__pk').annotate(min_level=Min('level')).order_by()
+    tree = Comment.objects.filter(tree_id=OuterRef('tree_id'), user=OuterRef(
+        'user')).values('tree_id', 'user__pk').annotate(min_level=Min('level')).order_by()
     stories = Comment.objects.filter(
         user=request.user
     ).filter(
-        Q(level__in=Subquery(tree.values('min_level'), output_field=models.IntegerField()))  # TODO: level= or level__in= ???
+        # TODO: level= or level__in= ???
+        Q(level__in=Subquery(tree.values('min_level'),
+                             output_field=models.IntegerField()))
     ).select_related(
         'user', 'parent', 'to_story'
     ).order_by(
@@ -195,19 +214,20 @@ def threads(request):
         back = _one_page_back(request)
         if back:
             return back
-    return render(request, 'news/index.html', {'stories': stories, 'hide_text':False, 'page': page, 'rank_start': None, 'show_children': True})
+    return render(request, 'news/index.html', {'stories': stories, 'hide_text': False, 'page': page, 'rank_start': None, 'show_children': True})
 
 
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, block=True)
 @cache_page(TIMEOUT_SHORT)
 @vary_on_cookie
-def comments(request): # TODO
+def comments(request):  # TODO
     page = int(request.GET.get('p', 0))
     paging_size = settings.PAGING_SIZE
     add_filter = {}
     if 'submitted_by' in request.GET.keys():
         try:
-            submitted_by = CustomUser.objects.get_by_natural_key(request.GET['submitted_by'])
+            submitted_by = CustomUser.objects.get_by_natural_key(
+                request.GET['submitted_by'])
             add_filter['user'] = submitted_by
         except CustomUser.DoesNotExist:
             raise Http404()
@@ -217,7 +237,8 @@ def comments(request): # TODO
             assert request.user.username == request.GET['upvoted_by']
         except AssertionError:
             return HttpResponseForbidden()
-        add_filter['pk__in'] = Vote.objects.filter(vote=1, user=request.user).values('item')
+        add_filter['pk__in'] = Vote.objects.filter(
+            vote=1, user=request.user).values('item')
     stories = Comment.objects.filter(
         parent=None
     ).filter(
@@ -231,7 +252,7 @@ def comments(request): # TODO
         back = _one_page_back(request)
         if back:
             return back
-    return render(request, 'news/index.html', {'stories': stories, 'hide_text':False, 'page': page, 'rank_start': page*paging_size})
+    return render(request, 'news/index.html', {'stories': stories, 'hide_text': False, 'page': page, 'rank_start': page*paging_size})
 
 
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, block=True)
@@ -244,7 +265,7 @@ def _vote(request, pk, vote=None, unvote=False):
     item = get_object_or_404(Item, pk=pk)
     if (not unvote) and (vote is not None):
         votes = Vote.objects.filter(item=item, user=request.user)
-        if request.method=="POST":
+        if request.method == "POST":
             if vote > 0:
                 if not item.can_be_upvoted_by(request.user):
                     return HttpResponseForbidden()
@@ -253,9 +274,9 @@ def _vote(request, pk, vote=None, unvote=False):
                     return HttpResponseForbidden()
             vote = Vote(vote=vote, item=item, user=request.user)
             vote.save()
-            return HttpResponse("OK %s"%(vote.pk))
+            return HttpResponse("OK %s" % (vote.pk))
     if unvote:
-        if request.method=="POST":
+        if request.method == "POST":
             Vote.objects.filter(item=item, user=request.user).delete()
             return HttpResponse("OK")
 
@@ -287,9 +308,10 @@ def save(request):
 
 
 def _item_story_comment(pk):
-    try: 
+    try:
         # .prefetch_related('children', 'parent')
-        item = Item.objects.select_related('story', 'comment', 'user', 'parent').prefetch_related('children').get(pk=pk)
+        item = Item.objects.select_related(
+            'story', 'comment', 'user', 'parent').prefetch_related('children').get(pk=pk)
     except Exception as e:
         raise e
     try:
@@ -311,15 +333,17 @@ def _item_story_comment(pk):
 
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, method=['GET'], block=True)
 @ratelimit(key="user_or_ip", group="news-post", rate=DEFAULT_POST_RATE, method=['POST'], block=True)
-def item(request, pk): # DONE
+def item(request, pk):  # DONE
     item, story, comment = _item_story_comment(pk)
     if story == item:
         if story.duplicate_of is not None:
             return HttpResponseRedirect(story.duplicate_of.get_absolute_url())
     if request.user.is_authenticated:
-        parent = None if story==item else item
-        comment_instance = Comment(user=request.user, to_story=story, parent=parent)
-        comment_form = CommentForm(request.POST or None, instance=comment_instance)
+        parent = None if story == item else item
+        comment_instance = Comment(
+            user=request.user, to_story=story, parent=parent)
+        comment_form = CommentForm(
+            request.POST or None, instance=comment_instance)
         if request.method == 'POST':
             if comment_form.is_valid():
                 comment = comment_form.save()
@@ -345,7 +369,7 @@ def item_edit(request, pk):
         assert story is not None
         form = StoryForm(request.POST or None, instance=item)
     assert form is not None
-    if request.method=="POST":
+    if request.method == "POST":
         if form.is_valid():
             item = form.save()
             return HttpResponseRedirect(story.get_absolute_url() + '#' + str(item.pk))
@@ -371,14 +395,14 @@ def item_delete(request, pk):
 @login_required
 @ratelimit(key="user_or_ip", group="news-get", rate=DEFAULT_GET_RATE, method=['GET'], block=True)
 @ratelimit(key="user_or_ip", group="news-post", rate=DEFAULT_POST_RATE, method=['POST'], block=True)
-def submit(request): # DONE
+def submit(request):  # DONE
     instance = Story(user=request.user)
     form = AddStoryForm(request.POST or None, initial={
-        'title': request.GET.get('t'),
-        'url': request.GET.get('u'),
+        'original_url': request.GET.get('u'),
+        'product_url': request.GET.get('p'),
         'text': request.GET.get('x'),
     }, instance=instance)
-    if request.method=="POST":
+    if request.method == "POST":
         if form.is_valid():
             instance = form.save()
             return HttpResponseRedirect(instance.get_absolute_url())
@@ -390,6 +414,7 @@ def robots_txt(request):
 User-agent: *
 Disallow: 
     """, content_type='text/plain')
+
 
 def humans_txt(request):
     return HttpResponse("""

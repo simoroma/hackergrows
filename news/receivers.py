@@ -1,10 +1,14 @@
-#from django.core.signals import request_finished
+# from django.core.signals import request_finished
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+import re
+from bs4 import BeautifulSoup
 
 from .models import Item, Vote, Comment, Story
+
 
 @receiver(pre_save)
 def mark_show_and_ask(sender, instance, **kwargs):
@@ -26,8 +30,9 @@ def create_self_upvote_for_submission(sender, instance, created, **kwargs):
 def check_for_duplicates(sender, instance, created, **kwargs):
     if created and isinstance(instance, Story):
         story = instance
-        if story.url and story.duplicate_of is None:
-            other_stories = Story.objects.filter(url=story.url).exclude(pk=story.pk).order_by('-changed_at')
+        if story.original_url and story.product_url and story.duplicate_of is None:
+            other_stories = Story.objects.filter(original_url=story.original_url,
+                                                 product_url=story.product_url).exclude(pk=story.pk).order_by('-changed_at')
             c = other_stories.count()
             if c > 0:
                 new_vote = Vote(item=other_stories[0], vote=1, user=story.user)
@@ -41,7 +46,8 @@ def update_votes_count_on_submission(sender, instance, created, **kwargs):
     if created and isinstance(instance, Vote):
         vote = instance
         item = instance.item
-        other_votes = Vote.objects.filter(item=vote.item, user=vote.user, vote=vote.vote).exclude(pk=vote.pk)
+        other_votes = Vote.objects.filter(
+            item=vote.item, user=vote.user, vote=vote.vote).exclude(pk=vote.pk)
         if other_votes.count():
             return
         if instance.vote > 0:
@@ -56,7 +62,8 @@ def update_votes_count_on_submission(sender, instance, created, **kwargs):
 def update_user_karma_on_vote(sender, instance, created, **kwargs):
     if created and isinstance(instance, Vote):
         vote = instance
-        other_votes = Vote.objects.filter(item=vote.item, user=vote.user, vote=vote.vote).exclude(pk=vote.pk)
+        other_votes = Vote.objects.filter(
+            item=vote.item, user=vote.user, vote=vote.vote).exclude(pk=vote.pk)
         if other_votes.count():
             return
         item = instance.item
@@ -117,6 +124,49 @@ def update_user_karma_on_unvote(sender, instance, **kwargs):
 @receiver(pre_save)
 def add_domain_to_link_stories(sender, instance, **kwargs):
     if isinstance(instance, Story):
-        if instance.url:
-            o = urlparse(instance.url)
-            instance.domain = o.hostname.lower()
+        if instance.original_url:
+            o = urlparse(instance.original_url)
+            instance.original_url_domain = o.hostname.lower()
+
+        if instance.product_url:
+            o = urlparse(instance.product_url)
+            instance.product_url_domain = o.hostname.lower()
+
+
+# TODO fix, this is called twice. Adding uid does not work
+@receiver(pre_save)
+def add_title(sender, instance, **kwargs):
+    if isinstance(instance, Story):
+        instance.title = _get_title(url=instance.original_url,
+                                    back_up_title=instance.original_url)
+        instance.product_title = _get_title(url=instance.product_url,
+                                            back_up_title=instance.product_url)
+
+
+def _get_title(url, back_up_title):
+    try:
+        req = Request(url)
+        req.add_header('User-Agent', 'Hackergrows')
+        req.add_header('Access-Control-Allow-Origin', '*')
+        req.add_header('Access-Control-Allow-Methods', 'GET')
+        req.add_header('Access-Control-Allow-Headers', 'Content-Type')
+        req.add_header('Access-Control-Max-Age', '3600')
+        webpage = urlopen(req, timeout=2).read()
+
+        retitle = re.compile(
+            "<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
+
+        match = retitle.search(webpage.decode('utf-8', errors='ignore'))
+        if match:
+            title = match.group(1).strip()
+            # Parse HTML like &amp;
+            soup = BeautifulSoup(title, 'html.parser')
+            # Avoid to parse back again &, <, and >
+            return soup.prettify(formatter=None)
+        else:
+            return back_up_title
+    except Exception as e:
+        print("Exception: {}".format(type(e).__name__))
+        print("Exception message: {}".format(e))
+        print(url)
+        return back_up_title
