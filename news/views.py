@@ -30,7 +30,7 @@ from ratelimit.decorators import ratelimit
 # suggest changes
 # save
 
-DEFAULT_GET_RATE = "2/s"
+DEFAULT_GET_RATE = "4/s"
 DEFAULT_VOTES_RATE = "10/m"
 DEFAULT_POST_RATE = "5/m"
 
