@@ -124,11 +124,11 @@ def update_user_karma_on_unvote(sender, instance, **kwargs):
 @receiver(pre_save)
 def add_domain_to_link_stories(sender, instance, **kwargs):
     if isinstance(instance, Story):
-        if instance.original_url:
+        if not instance.original_url_domain:
             o = urlparse(instance.original_url)
             instance.original_url_domain = o.hostname.lower()
 
-        if instance.product_url:
+        if not instance.product_url_domain:
             o = urlparse(instance.product_url)
             instance.product_url_domain = o.hostname.lower()
 
