@@ -4,7 +4,7 @@
                     {% if item.title %}
                     <span class="title">
                             <a href="{{item.original_url}}">{{item.title}}</a> <span class="smaller">(<a href="{% url 'newest' %}?site={{item.original_url_domain}}">{{item.original_url_domain}}</a>)</span>,
-                            🌱 <a rel="ugc" href="{{item.product_url}}">{{item.product_title}}</a> <span class="smaller">(<a href="{% url 'newest' %}?product={{item.product_url_domain}}">{{item.product_url_domain}}</a>)</span>
+                            🌱 <a href="{{item.product_url}}">{{item.product_title}}</a> <span class="smaller">(<a href="{% url 'newest' %}?product={{item.product_url_domain}}">{{item.product_url_domain}}</a>)</span>
                     </span>
                     {% endif %}
                     {% if item.text and not hide_text %}
