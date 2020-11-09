@@ -7,7 +7,6 @@ from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 
 
-
 from .models import CustomUser, Invitation, EmailVerification, PasswordResetRequest
 
 
@@ -22,7 +21,8 @@ def lower_email_addresses(sender, instance, **kwargs):
 @receiver(post_save)
 def send_invitation_email(sender, instance, created, **kwargs):
     if created and isinstance(instance, Invitation):
-        subject, from_email, to = 'You have been invited to %s'%(settings.SITE_DOMAIN), 'bot@python.sc', instance.invited_email_address
+        subject, from_email, to = 'You have been invited to %s' % (
+            settings.SITE_DOMAIN), 'bot@python.sc', instance.invited_email_address
         text_content = """
 You have been invited to news.python.sc.
 
@@ -44,30 +44,32 @@ news.python.sc - A social news aggregator for the Python community.
 def create_verification(sender, instance, created, **kwargs):
     if isinstance(instance, CustomUser):
         if instance.email:
-            verifications = EmailVerification.objects.filter(user=instance, email=instance.email)
+            verifications = EmailVerification.objects.filter(
+                user=instance, email=instance.email)
             if not verifications.count():
                 create_v = True
             else:
                 verified = any([i.verified for i in verifications])
                 # create_v = not verified
                 create_v = False
-            
+
             if create_v:
-                verification = EmailVerification(user=instance, email=instance.email)
+                verification = EmailVerification(
+                    user=instance, email=instance.email)
                 verification.save()
 
 
 @receiver(post_save)
 def send_verification_email(sender, instance, created, **kwargs):
     if created and isinstance(instance, EmailVerification):
-        subject, from_email, to = 'Please confirm your account on news.python.sc', 'bot@python.sc', instance.email
+        subject, from_email, to = 'Please confirm your account on Hackergrows', 'bot@hackgrows.com', instance.email
         text_content = """
 Please confirm your email address here:
 
-https://news.python.sc{url}
+https://hackergrows.com{url}
 
 -- 
-news.python.sc - A social news aggregator for the Python community.
+Hackergrows links products to online discussions.
 
 """.format(url=instance.get_verify_url())
         #html_content = '<p>This is an <strong>important</strong> message.</p>'
@@ -79,14 +81,14 @@ news.python.sc - A social news aggregator for the Python community.
 @receiver(post_save)
 def send_password_reset_email(sender, instance, created, **kwargs):
     if created and isinstance(instance, PasswordResetRequest):
-        subject, from_email, to = 'Reset password for your account on news.python.sc', 'bot@python.sc', instance.email
+        subject, from_email, to = 'Reset password for your account on Hackergrows', 'bot@hackergrows.com', instance.email
         text_content = """
 Please confirm your email address here:
 
-https://news.python.sc{url}
+https://hackergrows.com{url}
 
 -- 
-news.python.sc - A social news aggregator for the Python community.
+Hackergrows links products to online discussions.
 
 """.format(url=instance.get_verify_url())
         #html_content = '<p>This is an <strong>important</strong> message.</p>'

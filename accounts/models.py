@@ -27,7 +27,7 @@ class CustomUser(AbstractUser, MPTTModel):
                             blank=True, related_name='invitees', editable=False)
 
     used_invitation = models.ForeignKey(
-        'Invitation', null=True, default=None, on_delete=models.CASCADE)
+        'Invitation', null=True, blank="True", default=None, on_delete=models.CASCADE)
 
     def get_absolute_url(self):
         return reverse("accounts_profile", kwargs={"username": self.username})
