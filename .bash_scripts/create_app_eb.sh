@@ -4,6 +4,7 @@ conda activate django-p3.7
 eb init -p python-3.7 django-tutorial
 # create environment
 eb create django-env
+# better just eb create (gives more options)
 # check enviroment
 eb status
 # associate a git branch to an enviroment
