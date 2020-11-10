@@ -126,6 +126,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.environments/
 
 # Spyder project settings
 .spyderproject
@@ -234,5 +235,11 @@ Temporary Items
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
 
 # End of https://www.gitignore.io/api/code,macos,python,django,visualstudiocode
