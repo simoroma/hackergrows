@@ -2,7 +2,7 @@ appnope==0.1.0
 asgiref==3.2.10
 astroid==2.4.2
 autopep8==1.5.4
-aws-psycopg2==1.1.1
+aws-psycopg2==1.2.1
 awsebcli==3.19.2
 backcall==0.1.0
 bcrypt==3.2.0
@@ -69,6 +69,7 @@ termcolor==1.1.0
 texttable==0.9.1
 toml==0.10.2
 traitlets==4.3.2
+typed-ast==1.4.1
 urllib3==1.25.11
 wcwidth==0.1.7
 webencodings==0.5.1
