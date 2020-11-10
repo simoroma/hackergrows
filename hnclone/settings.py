@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-
+from socket import gethostname, gethostbyname
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,17 +21,23 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
+# Used to send errors
+ADMINS = [('Hackergrows admin', 'admin@hackergrows.com')]
+# Emails will be from
+SERVER_EMAIL = 'noreply@hackergrows.com'
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'TODO'  # TODO
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = (os.getenv("DEBUG") == 'True')
+PRODUCTION = (os.getenv("PRODUCTION") == 'True')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
 
+if 'hackergrows.com' in os.getenv('ALLOWED_HOSTS'):
+    ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 USE_X_FORWARDED_HOST = True
-ALLOWED_HOSTS = [
-    'localhost',
-]
 
 
 # Application definition
@@ -96,12 +102,25 @@ WSGI_APPLICATION = 'hnclone.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if 'DB_HOST' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.environ['DB_ENGINE'],
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.environ['DB_PORT'],
+            'AUTO_CREATE': os.environ['DB_AUTO_CREATE']
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
@@ -172,4 +191,17 @@ SITE_URL = 'https://hackergrows.com'
 SITE_DOMAIN = 'hackergrows.com'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email
+if 'hackergrows.com' in os.getenv('ALLOWED_HOSTS'):
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    EMAIL_PORT = os.getenv("EMAIL_PORT")
+    EMAIL_USE_SSL = (os.getenv("EMAIL_USE_SSL") == 'True')
+    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+else:
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+# end email
+
+SITE_REDIRECT_URI = os.getenv("SITE_REDIRECT_URI")
