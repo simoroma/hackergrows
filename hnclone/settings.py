@@ -214,3 +214,27 @@ else:
 SITE_REDIRECT_URI = os.getenv("SITE_REDIRECT_URI")
 
 REAL_ADMIN_PATH = os.getenv("REAL_ADMIN_PATH")
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    # Don't send invalid host error messages to ADMINS.
+    # https://docs.djangoproject.com/en/dev/topics/logging/#django-security
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    # There are many bots that access the website via direct ip or
+    # fake host names. They get a 400 Bad request. I don't want to be
+    # notified about this.
+    # A better approach would be to force assess the right domain
+    # only. I did not manage to do it in elasticbeanstalk.
+    'loggers': {
+        'django.security.DisallowedHost': {
+            'handlers': ['null'],
+            'propagate': False,
+        },
+    },
+}
