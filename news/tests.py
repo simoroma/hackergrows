@@ -571,9 +571,9 @@ class ReceiversNewsTest(TestCase):
         story = Story.objects.get(pk=story.pk)
         self.assertEqual(story.num_comments, 2)
 
-        comment1.delete()
+        comment2.delete()
         story = Story.objects.get(pk=story.pk)
-        self.assertEqual(story.num_comments, 0)
+        self.assertEqual(story.num_comments, 1)
 
     def test_update_item_votes_on_unvote(self):
         story = Story(original_url="https://hackergrows.com",
