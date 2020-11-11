@@ -65,9 +65,11 @@ INSTALLED_APPS = [
     'health_check.cache',
     'health_check.storage',
 
+    'admin_honeypot',
 ]
 
 MIDDLEWARE = [
+    'hnclone.middleware.RemoteAddrMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
@@ -210,3 +212,5 @@ else:
 # end email
 
 SITE_REDIRECT_URI = os.getenv("SITE_REDIRECT_URI")
+
+REAL_ADMIN_PATH = os.getenv("REAL_ADMIN_PATH")

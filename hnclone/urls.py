@@ -11,7 +11,8 @@ urlpatterns = [
     path('', include('news.urls')),
     path('', include('accounts.urls')),
     path('digest/', include('emaildigest.urls')),
-    path('admin/', admin.site.urls),
+    path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
+    path(settings.REAL_ADMIN_PATH, admin.site.urls),
     path('health/', include('health_check.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
