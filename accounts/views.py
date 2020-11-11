@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 
 
-from .models import CustomUser, Invitation, EmailVerification
+from .models import CustomUser, Invitation, EmailVerification, PasswordResetRequest
 from .forms import ProfileForm, RegisterForm, CreateInviteForm, PasswordForgottenForm, PasswortResetForm
 
 
@@ -26,7 +26,8 @@ def my_profile(request):
     instance = request.user
     form = ProfileForm(request.POST or None, instance=instance)
     if request.user.email:
-        verifications = EmailVerification.objects.filter(user=request.user, email=request.user.email)
+        verifications = EmailVerification.objects.filter(
+            user=request.user, email=request.user.email)
         verified = any([i.verified for i in verifications])
     else:
         verified = False
@@ -39,9 +40,9 @@ def my_profile(request):
 
 @login_required
 def create_invite(request):
-    instance = Invitation(inviting_user = request.user)
+    instance = Invitation(inviting_user=request.user)
     form = CreateInviteForm(request.POST or None, instance=instance)
-    if request.method=="POST":
+    if request.method == "POST":
         if form.is_valid():
             instance = form.save()
             return HttpResponseRedirect(instance.get_absolute_url())
@@ -60,8 +61,8 @@ def register(request):
         invitation = Invitation.objects.get(invite_code=invite_code)
     except:
         invitation = None
-    instance = CustomUser(used_invitation=invitation, 
-                          parent=getattr(invitation, 'inviting_user', None), 
+    instance = CustomUser(used_invitation=invitation,
+                          parent=getattr(invitation, 'inviting_user', None),
                           email=getattr(invitation, 'invited_email_address', None))
     if not settings.ACCEPT_UNINVITED_REGISTRATIONS and (invitation is None or not getattr(invitation, 'active', False)):
         return render(request, 'accounts/register_closed.html')
@@ -78,18 +79,21 @@ def register(request):
 
 
 def verify(request, verification_code):
-    verification = get_object_or_404(EmailVerification, verification_code=verification_code)
+    verification = get_object_or_404(
+        EmailVerification, verification_code=verification_code)
     assert verification.user.email == verification.email
     verification.verified = True
     verification.verified_at = timezone.now()
     verification.save()
     return render(request, 'accounts/verify.html')
 
+
 @login_required
 def resend_verification(request):
-    if request.method=="POST":
+    if request.method == "POST":
         assert request.user.email
-        verification = EmailVerification(user=request.user, email=request.user.email)
+        verification = EmailVerification(
+            user=request.user, email=request.user.email)
         verification.save()
         return render(request, 'accounts/resend_verification.html')
 
@@ -124,22 +128,23 @@ def password_forgotten(request, verification_code=None):
                 error = 'User not found.'
         return render(request, 'accounts/password_forgotten_form.html', {'form': form, 'error': error})
     else:
-        reset_request = get_object_or_404(PasswordResetRequest, verification_code=verification_code)
+        reset_request = get_object_or_404(
+            PasswordResetRequest, verification_code=verification_code)
         form = PasswortResetForm(request.POST or None)
-        if request.method=="POST":
+        if request.method == "POST":
             if form.is_valid():
-                reset_request.user.set_password(form.cleaned_data['password']) # TODO: confirm password, password rules
+                # TODO: confirm password, password rules
+                reset_request.user.set_password(form.cleaned_data['password'])
                 reset_request.user.save()
-                return HttpResponseRedirect(reverse('/login'))
+                return HttpResponseRedirect(reverse('login'))
         return render(request, 'accounts/password_forgotten_form.html', {'form': form})
 
 
 @login_required
 def logout(request):
-    if request.method=="POST":
+    if request.method == "POST":
         do_logout(request)
         redirect_url = settings.LOGOUT_REDIRECT_URL or '/'
         return HttpResponseRedirect(redirect_url)
     else:
         return render(request, 'accounts/logout.html')
-
