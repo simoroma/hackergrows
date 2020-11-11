@@ -12,6 +12,7 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('digest/', include('emaildigest.urls')),
     path('admin/', admin.site.urls),
+    path('health/', include('health_check.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:

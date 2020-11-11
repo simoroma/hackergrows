@@ -59,6 +59,11 @@ INSTALLED_APPS = [
     'news',
     'emaildigest',
 
+    # health check
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
+    'health_check.storage',
 
 ]
 
