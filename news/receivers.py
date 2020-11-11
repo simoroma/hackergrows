@@ -152,7 +152,7 @@ def _get_title(url, back_up_title):
         req.add_header('Access-Control-Allow-Methods', 'GET')
         req.add_header('Access-Control-Allow-Headers', 'Content-Type')
         req.add_header('Access-Control-Max-Age', '3600')
-        webpage = urlopen(req, timeout=2).read()
+        webpage = urlopen(req, timeout=4).read()
 
         retitle = re.compile(
             "<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
