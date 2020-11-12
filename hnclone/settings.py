@@ -197,6 +197,7 @@ SITE_NAME = 'Hackergrows'
 SITE_URL = 'https://hackergrows.com'
 SITE_DOMAIN = 'hackergrows.com'
 SITE_DESCRIPTION = 'Hackergrows links products to online discussions'
+GOOGLE_ANALYTICS_ID = os.getenv("GOOGLE_ANALYTICS_ID")
 
 
 # Email
