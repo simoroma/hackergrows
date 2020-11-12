@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="{{SITE_NAME}}">
+    <meta property="og:title" content="{{SITE_DESCRIPTION}}">
     <meta property="og:site_name" content="{{SITE_NAME}}">
     <meta name="generator" content="Python+Django" />
     <meta name="theme-color" content="#ffffff" />
@@ -18,7 +18,7 @@
     <link rel="icon" type="image/png" sizes="144x144" href="{% static 'icon.png' %}" />
     <!--<link rel="alternate" type="application/rss+xml" title="RSS" href="/rss" />-->
 
-    <title>{% block title %}{% endblock title %}{{SITE_NAME}}</title>
+    <title>{{SITE_DESCRIPTION}} {% block title %}{% endblock title %}</title>
 </head>
 
 
@@ -72,7 +72,7 @@
 
 
         <nav id="footer-bar">
-            <p class="smaller">{{SITE_NAME}} links products to online discussions.</p>
+            <p class="smaller">{{SITE_DESCRIPTION}}. <a href="https://github.com/simoroma/hackergrows" target="_blank">Source code.</a></p>
         </nav>
     </main>
 <script type="text/javascript" src="{% static 'news.js'%}"></script>
