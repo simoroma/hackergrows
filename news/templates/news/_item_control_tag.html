@@ -3,10 +3,24 @@
                     <span class="controls">
                             <span class="smaller">
                                 {{item.points}} point{{item.points|pluralize}} by {%link_user item.user%} <span class="naturaltime" data-orig-time="{{item.created_at.isoformat}}">{{item.created_at|naturaltime}}
+                                {% if item.is_story %}
+                                
                                 {% if item.text %}
                                 <span>| <a href="{{item.get_absolute_url}}">read</a></span>
                                 {% endif %}
-                                <span>| <a href="{{item.get_absolute_url}}">{{item.num_comments}} comments</a></span>
+                                
+                                {% if item.num_comments > 0 %}
+                                <span>| <a href="{{item.get_absolute_url}}">{{item.num_comments}} comment{{item.num_comments|pluralize}}</a></span>
+                                {% else %}
+                                <span>| <a href="{{item.get_absolute_url}}">discuss</a></span>
+                                {% endif %}
+
+                                {% else %}
+
+                                <span>| <a href="{{item.get_absolute_url}}">reply</a></span>
+        
+                                {% endif %}
+
                                 {% if item.num_comments == 0 and item.user == request_user %}| <a href="{% url 'edit' pk=item.pk %}">edit</a></span>{% endif %}
                                 {% if item.num_comments == 0 and item.user == request_user %}| <a href="{% url 'delete' pk=item.pk %}">delete</a></span>{% endif %}
                     </span>
