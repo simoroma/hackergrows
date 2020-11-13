@@ -7,9 +7,14 @@
 {{ form.as_table }}
 </table>
 <button type="submit">submit</button>
+<ul class="horizontal-list">
+    <li><a class="smaller" href="{% url 'zen' %}">guidelines</a></li>
+    <li><a class="smaller" href="javascript:toggleFormattingHelp()">formatting help</a></li>
+</ul>
 </form>
 
-
-
 </article>
+
+{% include "news/formatting_help.html" %}
+
 {% endblock content %}
