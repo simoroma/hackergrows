@@ -35,6 +35,10 @@
 
 {% include "news/formatting_help.html" %}
 
+{% else %}
+{% if not user.is_authenticated %}
+<i>You have to <a href="{% url 'login' %}">log in</a> to comment.</i>
+{% endif %}
 {% endif %}
 
 
