@@ -1,6 +1,15 @@
 {% load static %}{% load humanize %}{% load emaildigest_extra %}<!doctype html>
 <html lang="en">
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{GOOGLE_ANALYTICS_ID}}"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', '{{GOOGLE_ANALYTICS_ID}}');
+    </script>
     <meta charset="utf-8" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:type" content="website" />
@@ -20,15 +29,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'news.css'%}" />
     <link rel="icon" type="image/png" sizes="144x144" href="{% static 'icon.png' %}" />
     <!--<link rel="alternate" type="application/rss+xml" title="RSS" href="/rss" />-->
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{GOOGLE_ANALYTICS_ID}}"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', '{{GOOGLE_ANALYTICS_ID}}');
-    </script>
     <title>{{SITE_DESCRIPTION}} {% block title %}{% endblock title %}</title>
 </head>
 
