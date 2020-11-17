@@ -28,7 +28,7 @@ class BasicNewsTest(TestCase):
     def test_submit_post_with_title_and_url(self):
         """Submission is posted with title and URL."""
         request = self.factory.post(
-            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com'})
+            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com/newest'})
         request.user = self.user
         response = submit(request)
         self.assertEqual(response.status_code, 302)
@@ -44,7 +44,7 @@ class BasicNewsTest(TestCase):
     def test_submit_and_frontpage_and_newest(self):
         """A submission should appear on frontpage (as we have an empty database) and on the newest page."""
         request = self.factory.post(
-            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com'})
+            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com/newest'})
         request.user = self.user
         response = submit(request)
 
@@ -63,7 +63,7 @@ class BasicNewsTest(TestCase):
     def test_submit_and_upvote(self):
         """A submission can be upvoted."""
         request = self.factory.post(
-            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com'})
+            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com/newest'})
         request.user = self.other_user
         response = submit(request)
         item_url = response.url
@@ -88,7 +88,7 @@ class BasicNewsTest(TestCase):
     def test_submit_and_upvote_and_unvote(self):
         """A submission can be upvoted."""
         request = self.factory.post(
-            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com'})
+            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com/newest'})
         request.user = self.other_user
         response = submit(request)
         item_url = response.url
@@ -115,7 +115,7 @@ class BasicNewsTest(TestCase):
     def test_submit_and_downvote(self):
         """A submission cannot be downvoted."""
         request = self.factory.post(
-            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com'})
+            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com/newest'})
         request.user = self.other_user
         response = submit(request)
         item_url = response.url
@@ -131,7 +131,7 @@ class BasicNewsTest(TestCase):
     def test_submit_and_upvote_self(self):
         """A submission cannot be upvoted by the submitting user."""
         request = self.factory.post(
-            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com'})
+            '/submit', {'original_url': 'https://hackergrows.com', 'product_url': 'https://hackergrows.com/newest'})
         request.user = self.user
         response = submit(request)
         item_url = response.url
