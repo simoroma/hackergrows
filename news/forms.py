@@ -29,6 +29,10 @@ class AddStoryForm(forms.ModelForm):
             raise forms.ValidationError(
                 "Please provide URL to a product.")
 
+        if original_url == product_url:
+            raise forms.ValidationError(
+                "You have to provide two different URLs.")
+
 
 class StoryForm(forms.ModelForm):
     class Meta:
