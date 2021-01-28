@@ -51,7 +51,7 @@ def _one_page_back(request):
     return HttpResponseRedirect(_more_link)
 
 
-def _front_page(paging_size=settings.PAGING_SIZE, page=0, add_filter={}, add_q=[], as_of=None, days_back=50):
+def _front_page(paging_size=settings.PAGING_SIZE, page=0, add_filter={}, add_q=[], as_of=None, days_back=5000):
     # TODO: weighting https://medium.com/hacking-and-gonzo/how-hacker-news-ranking-algorithm-works-1d9b0cf2c08d
     # (P-1) / (T+2)^G
     if as_of is None:
