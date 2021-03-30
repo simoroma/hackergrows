@@ -55,7 +55,7 @@ prompt-toolkit==2.0.9
 ptyprocess==0.6.0
 pycodestyle==2.6.0
 pycparser==2.20
-Pygments==2.4.2
+Pygments==2.7.4
 pylint==2.6.0
 PyNaCl==1.4.0
 python-dateutil==2.8.0
