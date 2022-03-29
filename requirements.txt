@@ -46,7 +46,7 @@ lxml==4.6.1
 Markdown==3.1.1
 mccabe==0.6.1
 mistune==0.8.4
-paramiko==2.7.2
+paramiko==2.10.1
 parso==0.5.1
 pathspec==0.5.9
 pexpect==4.7.0
